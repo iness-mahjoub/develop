@@ -3,19 +3,24 @@ import {
   ShopOutlined,
   ShoppingCartOutlined,
   UserOutlined,
+
 } from "@ant-design/icons";
 import { Menu } from "antd";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
+import CategoryIcon from '@mui/icons-material/Category';
+
+
+import React from 'react';
+
+
+import { FaPercentage } from "react-icons/fa";
 
 function SideMenu() {
   const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState("/");
 
-  useEffect(() => {
-    const pathName = location.pathname;
-    setSelectedKeys(pathName);
-  }, [location.pathname]);
 
   const navigate = useNavigate();
   return (
@@ -31,24 +36,47 @@ function SideMenu() {
         items={[
           {
             label: "Dashbaord",
+
             icon: <AppstoreOutlined />,
-            key: "/",
+            key: "/Dashboard",
           },
           {
-            label: "Inventory",
+            label: "Produit",
             key: "/inventory",
             icon: <ShopOutlined />,
           },
           {
-            label: "Orders",
+            label: "Commande",
             key: "/orders",
             icon: <ShoppingCartOutlined />,
           },
           {
-            label: "Customers",
+            label: "Cotegorie",
+            key: "/cotegoris",
+            icon: <ShopOutlined />,
+          },
+          {
+            label: "Sous_Categorie",
+            key: "/Souscategories",
+            icon: <CategoryIcon />,
+          },
+          {
+            label: "Client",
             key: "/customers",
             icon: <UserOutlined />,
           },
+          {
+            label: "offre",
+            key: "/offre",
+            icon: <FaPercentage />,
+          },
+
+          {
+            label: "CodePromo",
+            key: "/Promocode",
+            icon: <CardGiftcardIcon />,
+          },
+
         ]}
       ></Menu>
     </div>

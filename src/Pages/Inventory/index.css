@@ -1,0 +1,23 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+
+
+}
+
+#app {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 1200px;
+    margin-top: 40px;
+    margin-left: 40px;
+
+}
+
+.table-container {
+    width: 100%;
+}

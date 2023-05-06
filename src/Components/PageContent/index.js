@@ -1,4 +1,5 @@
 import AppRoutes from "../AppRoutes";
+import React from "react";
 
 function PageContent() {
   return (

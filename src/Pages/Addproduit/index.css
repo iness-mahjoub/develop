@@ -1,0 +1,48 @@
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  input {
+    margin-right: 80px;
+  } 
+  form label {
+    font-size: 14px;
+    margin-bottom: 80px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  form label span {
+    margin-right: 8px;
+  }
+  
+  form input,
+  form textarea {
+    width: 100%;
+    font-size: 16px;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    margin-bottom: 16px;
+    
+  }
+
+  form label, form input, form textarea {
+    margin-bottom: 0px;
+  }
+  form label, form input, form textarea {
+    font-size: 14px;
+  }
+  
+  /*pour augmenter la distance dans le formulaire // Pour ajouter une marge inférieure entre les champs du formulaire :*/
+
+
+.container {
+  margin-top: 50px;
+  margin-bottom: 20px;
+}
+
