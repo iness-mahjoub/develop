@@ -1,79 +1,84 @@
-import { Form, Input, Button, Upload } from 'antd';
-import React, { useState } from "react";
-import { addProduct } from "../../API";
-import "./index.css";
-import { Typography } from "antd";
+import React, { useState } from 'react';
+import axios from 'axios';
 
-function AddProduit() {
-  const [loading, setLoading] = useState(false);
-  const [form] = Form.useForm();
-  
-  const handleFinish = async (values) => {
-    setLoading(true);
-    const formData = new FormData();
-    formData.append("title", values.title);
-    formData.append("description", values.description);
-    formData.append("price", values.price);
-    formData.append("stock", values.stock);
-    formData.append("category", values.category);
-    formData.append("brand", values.brand);
-    formData.append("thumbnail", values.thumbnail[0]);
+const AddProduct = () => {
+  const [productData, setProductData] = useState({
+    name: '',
+    prix: '',
+    imageFile: null,
+    categorie_id: '',
+    description: '',
+    size: '',
+    stock: '',
+    stock1: '',
+  });
 
-    try {
-      await addProduct(formData);
-      form.resetFields();
-      alert("Product added successfully!");
-    } catch (error) {
-      console.error(error);
-      alert("Failed to add product.");
-    } finally {
-      setLoading(false);
-    }
+  const handleInputChange = (event) => {
+    setProductData({
+      ...productData,
+      [event.target.name]: event.target.value,
+    });
   };
 
-  const handleUploadChange = (info) => {
-    if (info.file.status === 'done') {
-      form.setFieldsValue({ thumbnail: [info.file.response.url] });
-    }
+  const handleFileChange = (event) => {
+    setProductData({
+      ...productData,
+      imageFile: event.target.files[0],
+    });
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const formData = new FormData();
+    formData.append('name', productData.name);
+    formData.append('prix', productData.prix);
+    formData.append('imageFile', productData.imageFile);
+    formData.append('categorie_id', productData.categorie_id);
+    formData.append('description', productData.description);
+    formData.append('size', productData.size);
+    formData.append('stock', productData.stock);
+    formData.append('stock1', productData.stock1);
+
+    axios.post('http://localhost:8000/api/produits', formData)
+        .then((response) => {
+          console.log(response.data);
+          // handle success
+        })
+        .catch((error) => {
+          console.log(error.response.data);
+          // handle error
+        });
   };
 
   return (
-    <><Typography.Title level={4} style={{ color: 'rgb(220, 17, 17)' }}>Ajouter un nouveau produit</Typography.Title><div className="container">
-      <Form form={form} onFinish={handleFinish} labelCol={{ span: 5 }} labelAlign='left'>
-        <Form.Item label="Nom" name="title" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item label="Description" name="description" rules={[{ required: true }]}>
-          <Input.TextArea />
-        </Form.Item>
-        <Form.Item label="Prix" name="price" rules={[{ required: true }]}>
-          <Input type="number" min={0} />
-        </Form.Item>
-        <Form.Item label="Stock" name="stock" rules={[{ required: true }]}>
-          <Input type="number" min={0} />
-        </Form.Item>
-        <Form.Item label="Catégories" name="category" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item label="Sous_Categorie" name="brand" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item label="Image" name="thumbnail" rules={[{ required: true }]}>
-          <Upload
-            action="/api/upload"
-            listType="picture"
-            onChange={handleUploadChange}
-          >
-            <Button type='default' style={{ backgroundColor: 'white', color: 'black' }}>importer Image</Button>
-          </Upload>
-        </Form.Item>
-        <div className="button-container">
-          <Button type="primary" loading={loading} htmlType="submit">Ajouter </Button>
-          <Button  onClick={() => form.resetFields()}>Effacer</Button>
-        </div>
-      </Form>
-    </div></>
-  );
-}
+      <form onSubmit={handleSubmit}>
+        <label htmlFor="name">Name:</label>
+        <input type="text" id="name" name="name" value={productData.name} onChange={handleInputChange} />
 
-export default AddProduit;
+        <label htmlFor="prix">Prix:</label>
+        <input type="number" id="prix" name="prix" value={productData.prix} onChange={handleInputChange} />
+
+        <label htmlFor="imageFile">Image:</label>
+        <input type="file" id="imageFile" name="imageFile" onChange={handleFileChange} />
+
+        <label htmlFor="categorie_id">Categorie ID:</label>
+        <input type="text" id="categorie_id" name="categorie_id" value={productData.categorie_id} onChange={handleInputChange} />
+
+        <label htmlFor="description">Description:</label>
+        <input type="text" id="description" name="description" value={productData.description} onChange={handleInputChange} />
+
+        <label htmlFor="size">Size:</label>
+        <input type="text" id="size" name="size" value={productData.size} onChange={handleInputChange} />
+
+        <label htmlFor="stock">Stock:</label>
+        <input type="number" id="stock" name="stock" value={productData.stock} onChange={handleInputChange} />
+
+        <label htmlFor="stock1">Stock1:</label>
+        <input type="number" id="stock1" name="stock1" value={productData.stock1} onChange={handleInputChange} />
+
+        <button type="submit">Submit</button>
+      </form>
+  );
+};
+
+export default AddProduct;

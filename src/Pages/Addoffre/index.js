@@ -1,60 +1,108 @@
-import React, { useState } from "react";
-import { Form, Input, Button, DatePicker } from "antd";
-import "./index.css";
-import { Typography } from "antd";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-const AddOffre = () => {
-const [form] = Form.useForm();
-const [loading, setLoading] = useState(false);
+const AddProduct = () => {
+    const [productData, setProductData] = useState({
+        name: '',
+        prix: '',
+        imageFile: null,
+        categorie_id: '',
+        description: '',
+        size: '',
+        stock: '',
+        stock1: '',
+    });
 
-const onFinish = (values) => {
-setLoading(true);
-console.log(values);
-// Ajouter l'offre en utilisant l'API ou tout autre moyen
-setLoading(false);
-form.resetFields();
+    const [categories, setCategories] = useState([]);
+
+    useEffect(() => {
+        axios.get('http://localhost:8000/api/categories')
+            .then((response) => {
+                setCategories(response.data['hydra:member']);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }, []);
+
+    const handleInputChange = (event) => {
+        setProductData({
+            ...productData,
+            [event.target.name]: event.target.value,
+        });
+    };
+
+    const handleFileChange = (event) => {
+        setProductData({
+            ...productData,
+            imageFile: event.target.files[0],
+        });
+    };
+
+    const handleSelectChange = (event) => {
+        setProductData({
+            ...productData,
+            categorie_id: event.target.value,
+        });
+    };
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        const formData = new FormData();
+        formData.append('name', productData.name);
+        formData.append('prix', productData.prix);
+        formData.append('imageFile', productData.imageFile);
+        formData.append('categorie_id', productData.categorie_id);
+        formData.append('description', productData.description);
+        formData.append('size', productData.size);
+        formData.append('stock', productData.stock);
+        formData.append('stock1', productData.stock1);
+
+        axios.post('http://localhost:8000/api/produits', formData)
+            .then((response) => {
+                console.log(response.data);
+                // handle success
+            })
+            .catch((error) => {
+                console.log(error.response.data);
+                // handle error
+            });
+    };
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <label htmlFor="name">Name:</label>
+            <input type="text" id="name" name="name" value={productData.name} onChange={handleInputChange} />
+
+            <label htmlFor="prix">Prix:</label>
+            <input type="number" id="prix" name="prix" value={productData.prix} onChange={handleInputChange} />
+
+            <label htmlFor="imageFile">Image:</label>
+            <input type="file" id="imageFile" name="imageFile" onChange={handleFileChange} />
+
+            <label htmlFor="categorie_id">Category:</label>
+            <select id="categorie_id" name="categorie_id" value={productData.categorie_id} onChange={handleSelectChange}>
+                <option value="">Select a category</option>
+                {categories.map((category) => (
+                    <option key={category.id} value={category.id}>{category.name}</option>
+                ))}
+            </select>
+
+            <label htmlFor="description">Description:</label>
+            <input type="text" id="description" name="description" value={productData.description} onChange={handleInputChange} />
+
+            <label htmlFor="size">Size:</label>
+            <input type="text" id="size" name="size" value={productData.size} onChange={handleInputChange} />
+
+            <label htmlFor="stock">Stock:</label>
+            <input type="number" id="stock" name="stock" value={productData.stock} onChange={handleInputChange} />
+
+            <label htmlFor="stock1">Stock1:</label>
+            <input type="number" id="stock1" name="stock1" value={productData.stock1} onChange={handleInputChange} />
+
+            <button type="submit">Submit</button>
+        </form>
+    );
 };
 
-return (
-    <><Typography.Title level={4} style={{ color: 'rgb(220, 17, 17)' }}> Ajouter une offre </Typography.Title><div className="add-offre-container">
-        <Form form={form} onFinish={onFinish} labelCol={{span:8}} labelAlign='left'>
-            <Form.Item
-                name="price"
-                label="Prix"
-                rules={[{ required: true, message: "Veuillez entrer le prix" }]}
-            >
-                <Input type="number" />
-            </Form.Item>
-            <Form.Item
-                name="discountPercentage"
-                label="Pourcentage de réduction"
-                rules={[
-                    { required: true, message: "Veuillez entrer le pourcentage de réduction" },
-                    { type: "number", min: 0, max: 100, message: "Le pourcentage doit être entre 0 et 100" }
-                ]}
-            >
-                <Input type="number" suffix="%" />
-            </Form.Item>
-            <Form.Item
-                name="dateDebut"
-                label="Date de début"
-                rules={[{ required: true, message: "Veuillez entrer la date de début" }]}
-            >
-                <DatePicker />
-            </Form.Item>
-            <Form.Item
-                name="dateFin"
-                label="Date de fin"
-                rules={[{ required: true, message: "Veuillez entrer la date de fin" }]}
-            >
-                <DatePicker />
-            </Form.Item>
-            <Form.Item>
-                <Button type="primary" htmlType="submit" loading={loading}>Ajouter l'offre</Button>
-            </Form.Item>
-        </Form>
-    </div></>
-);
-};
-
-export default AddOffre;
+export default AddProduct;

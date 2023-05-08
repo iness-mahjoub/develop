@@ -2,65 +2,51 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 const AddCategory = () => {
-    const [name, setName] = useState('');
-    const [image, setImage] = useState(null);
-    const [imageUrl, setImageUrl] = useState('');
+    const [categoryData, setCategoryData] = useState({
+        name: '',
+        imageFile: null,
+    });
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-
-        let imageData;
-        if (image) {
-            const reader = new FileReader();
-            reader.readAsDataURL(image);
-            reader.onloadend = async () => {
-                imageData = reader.result;
-                const formData = new FormData();
-                formData.append('name', name);
-                formData.append('image', imageData);
-
-                try {
-                    const response = await axios.post('http://localhost:8000/api/categories', formData, {
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    const savedCategory = response.data;
-                    console.log(savedCategory);
-                    alert('Category added successfully');
-                } catch (error) {
-                    console.error(error);
-                    alert('Failed to add category');
-                }
-            };
-        }
+    const handleInputChange = (event) => {
+        setCategoryData({
+            ...categoryData,
+            [event.target.name]: event.target.value,
+        });
     };
 
-    const handleFileInputChange = (event) => {
-        const file = event.target.files[0];
-        setImage(file);
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onloadend = () => {
-            setImageUrl(reader.result);
-        };
+    const handleFileChange = (event) => {
+        setCategoryData({
+            ...categoryData,
+            imageFile: event.target.files[0],
+        });
+    };
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        const formData = new FormData();
+        formData.append('name', categoryData.name);
+        formData.append('imageFile', categoryData.imageFile);
+
+        axios.post('http://localhost:8000/api/categories', formData)
+            .then((response) => {
+                console.log(response.data);
+                // handle success
+            })
+            .catch((error) => {
+                console.log(error.response.data);
+                // handle error
+            });
     };
 
     return (
         <form onSubmit={handleSubmit}>
-            <label>
-                Name:
-                <input type="text" value={name} onChange={(event) => setName(event.target.value)} />
-            </label>
-            <br />
-            <label>
-                Image:
-                <input type="file" accept="image/*" onChange={handleFileInputChange} />
-            </label>
-            <br />
-            {imageUrl && <img src={imageUrl} alt="category" style={{ maxWidth: '100px' }} />}
-            <br />
-            <button type="submit">Add Category</button>
+            <label htmlFor="name">Name:</label>
+            <input type="text" id="name" name="name" value={categoryData.name} onChange={handleInputChange} />
+
+            <label htmlFor="imageFile">Image:</label>
+            <input type="file" id="imageFile" name="imageFile" onChange={handleFileChange} />
+
+            <button type="submit">Submit</button>
         </form>
     );
 };

@@ -1,92 +1,86 @@
-import { Form, Input, Button, Select } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const { Option } = Select;
-
-function AddProduct() {
-  const [productData, setProductData] = useState({
-    name: '',
-    image: '',
-    category: ''
-  });
-
-  const [categories, setCategories] = useState([]);
-
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setProductData({ ...productData, [name]: value });
-  };
-
-  const handleCategoryChange = (value) => {
-    setProductData({ ...productData, category: value });
-  };
-
-  const handleImageChange = (event) => {
-    const files = Array.from(event.target.files);
-    setProductData({ ...productData, image: files });
-  };
-
-  const handleSubmit = async () => {
-    try {
-      const payload = {
-        name: productData.name,
-        image: productData.image,
-        categorie: productData.category
-      };
-      const response = await axios.post('http://localhost:8000/api/sous_categories', payload);
-      console.log(response.data);
-      setProductData({
+const AddProduct = () => {
+    const [productData, setProductData] = useState({
         name: '',
-        image: '',
-        category: ''
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  };
+        imageFile: null,
+        categorie_id: '',
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get('http://localhost:8000/api/categories');
-        setCategories(response.data['hydra:member']);
-      } catch (error) {
-        console.error(error);
-      }
+    });
+
+    const [categories, setCategories] = useState([]);
+
+    useEffect(() => {
+        axios.get('http://localhost:8000/api/categories')
+            .then((response) => {
+                setCategories(response.data['hydra:member']);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }, []);
+
+    const handleInputChange = (event) => {
+        setProductData({
+            ...productData,
+            [event.target.name]: event.target.value,
+        });
     };
-    fetchCategories();
-  }, []);
 
-  return (
-      <div>
-        <h2>Add New Product</h2>
-        <Form onFinish={handleSubmit}>
-          <Form.Item label="Name" name="name" rules={[{ required: true, message: 'Please enter the product name!' }]}>
-            <Input name="name" value={productData.name} onChange={handleInputChange} />
-          </Form.Item>
+    const handleFileChange = (event) => {
+        setProductData({
+            ...productData,
+            imageFile: event.target.files[0],
+        });
+    };
 
-          <Form.Item label="Image" name="image">
-            <input type="file" accept="image/*" onChange={handleImageChange} />
-          </Form.Item>
-          <Form.Item label="Category" name="category" rules={[{ required: true, message: 'Please select a category!' }]}>
-            <Select value={productData.category} onChange={handleCategoryChange}>
-              <Option value="">Select a category</Option>
-              {categories.map((category) => (
-                  <Option key={category.id} value={category['@id']}>
-                    {category.name}
-                  </Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Add Product
-            </Button>
-          </Form.Item>
-        </Form>
-      </div>
-  );
-}
+    const handleSelectChange = (event) => {
+        setProductData({
+            ...productData,
+            categorie_id: event.target.value,
+        });
+    };
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        const formData = new FormData();
+        formData.append('name', productData.name);
+        formData.append('imageFile', productData.imageFile);
+        formData.append('categorie_id', productData.categorie_id);
+
+
+        axios.post('http://localhost:8000/api/sous_categories', formData)
+            .then((response) => {
+                console.log(response.data);
+                // handle success
+            })
+            .catch((error) => {
+                console.log(error.response.data);
+                // handle error
+            });
+    };
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <label htmlFor="name">Name:</label>
+            <input type="text" id="name" name="name" value={productData.name} onChange={handleInputChange} />
+
+            <label htmlFor="imageFile">Image:</label>
+            <input type="file" id="imageFile" name="imageFile" onChange={handleFileChange} />
+
+            <label htmlFor="categorie_id">Category:</label>
+            <select id="categorie_id" name="categorie_id" value={productData.categorie_id} onChange={handleSelectChange}>
+                <option value="">Select a category</option>
+                {categories.map((category) => (
+                    <option key={category.id} value={category.id}>{category.name}</option>
+                ))}
+            </select>
+
+
+            <button type="submit">Submit</button>
+        </form>
+    );
+};
 
 export default AddProduct;
