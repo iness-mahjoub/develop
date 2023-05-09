@@ -3,18 +3,19 @@ import "./index.css";
 import React, { useState, useEffect } from "react";
 import { FaTrashAlt, FaEdit } from "react-icons/fa";
 import axios from "axios";
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function App() {
     const [categories, setCategories] = useState([]);
     const [data, setData] = useState([]);
+    const [details, setDetails] = useState([]);
     const [search, setSearch] = useState("");
 
     const handleDelete = (id) => {
         axios
-            .delete(`http://localhost:8000/api/categories/${id}`)
+            .delete(`http://localhost:8000/api/produits/${id}`)
             .then(() => {
-                setCategories(categories.filter((item) => item.id !== id));
+                setData(data.filter((item) => item.id !== id));
             })
             .catch((error) => console.log(error));
     };
@@ -23,23 +24,28 @@ export default function App() {
         console.log(`Edit ${id}`);
     };
 
-    const filteredData = data.filter(({ name }) =>
-        name.toLowerCase().includes(search.toLowerCase())
-    );
+    const filteredData = data
+        .map((item) => {
+            const detail = details.find((d) => d.produit === `/api/produits/${item.id}`);
+            return { ...item, ...detail };
+        })
+        .filter(({ name }) => name.toLowerCase().includes(search.toLowerCase()));
 
     useEffect(() => {
-        fetch("http://localhost:8000/api/categories")
-            .then((response) => response.json())
-            .then((data) => setData(data["hydra:member"]))
+        axios
+            .get("http://localhost:8000/api/produits")
+            .then((response) => setData(response.data["hydra:member"]))
+            .catch((error) => console.error(error));
+
+        axios
+            .get("http://localhost:8000/api/details")
+            .then((response) => setDetails(response.data["hydra:member"]))
             .catch((error) => console.error(error));
     }, []);
 
     return (
-
         <div id="app">
-
             <div className="container">
-
                 <div className="search-and-add">
                     <div className="search-container">
                         <input
@@ -49,14 +55,12 @@ export default function App() {
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
-                    <div className="red" >
-                        <Link to="/Addcategoris">
-                        <button className="add_category">Ajouter une catégorie</button>
-                    </Link>
+                    <div className="red">
+                        <Link to="/Addproduit">
+                            <button className="add_category">Ajouter un produit </button>
+                        </Link>
                     </div>
-
                 </div>
-
                 <div className="table-container">
                     <Table
                         bordered
@@ -71,17 +75,22 @@ export default function App() {
                         }}
                     >
                         <Table.Header>
-                            <Table.Column width={170}>id</Table.Column>
-                            <Table.Column width={200}>Name</Table.Column>
-                            <Table.Column width={160}>Image</Table.Column>
+                            <Table.Column width={50}>id</Table.Column>
+                            <Table.Column width={50}>Name</Table.Column>
+                            <Table.Column width={50}>Prix</Table.Column>
+                            <Table.Column width={50}>Image</Table.Column>
+                            <Table.Column width={50}>Description</Table.Column>
+
+                            <Table.Column width={50}>Stock</Table.Column>
+
                             <Table.Column width={70}>Actions</Table.Column>
                         </Table.Header>
-
                         <Table.Body>
-                            {filteredData.map(({ id, name, image }) => (
-                                <Table.Row key={id}>
-                                    <Table.Cell>{id}</Table.Cell>
-                                    <Table.Cell>{name}</Table.Cell>
+                            {filteredData.map((item) => (
+                                <Table.Row key={item.id}>
+                                    <Table.Cell>{item.id}</Table.Cell>
+                                    <Table.Cell>{item.name}</Table.Cell>
+                                    <Table.Cell>{item.prix}</Table.Cell>
                                     <Table.Cell>
                                         <div
                                             style={{
@@ -94,35 +103,29 @@ export default function App() {
                                             }}
                                         >
                                             <img
-                                                src={`http://localhost:8000/${image}`}
+                                                src={`http://localhost:8000/${item.image}`}
                                                 alt=""
                                                 style={{ maxWidth: "100%" }}
                                             />
                                         </div>
                                     </Table.Cell>
+                                    <Table.Cell>{item.description}</Table.Cell>
+
+                                    <Table.Cell>{item.stock}</Table.Cell>
+
                                     <Table.Cell>
-                                        <div className="action-buttons">
-                                            <button onClick={() => handleEdit(id)}>
-                                                <FaEdit />
-                                            </button>
-                                            <button onClick={() => handleDelete(id)}>
-                                                <FaTrashAlt />
-                                            </button>
+                                        <div className="actions">
+                                            <FaEdit className="edit" onClick={() => handleEdit(item.id)} />
+                                            <FaTrashAlt className="delete" onClick={() => handleDelete(item.id)} />
                                         </div>
                                     </Table.Cell>
                                 </Table.Row>
                             ))}
                         </Table.Body>
-                        <Table.Pagination
-                            shadow
-                            noMargin
-                            align="center"
-                            rowsPerPage={7}
-                            onPageChange={(page) => console.log({ page })}
-                        />
                     </Table>
                 </div>
             </div>
         </div>
     );
 }
+
