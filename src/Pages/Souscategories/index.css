@@ -50,3 +50,25 @@
   .addsouscategories:hover {
     background-color: #3e8e41; /* couleur de fond au survol */
   }
+.category-selector select {
+    border-radius: 16px; /* Adds a border radius of 5px */
+    padding: 8px; /* Adds some padding to the select element */
+    font-size: 16px; /* Increases the font size */
+    background-color: #f1f1f1; /* Adds a light gray background */
+    border: none; /* Removes the default border */
+    outline: none; /* Removes the default focus outline */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Adds a subtle box-shadow */
+
+}
+
+.category-selector select:hover {
+    cursor: pointer; /* Changes the cursor to a pointer on hover */
+}
+
+.category-selector label {
+    font-size: 19px; /* Increases the font size */
+    margin-right: 30px;
+    /* Adds some spacing between the label and select */
+
+}
+.category-selector{}

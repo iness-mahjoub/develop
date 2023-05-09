@@ -42,10 +42,8 @@ const AddCategory = () => {
         <form onSubmit={handleSubmit}>
             <label htmlFor="name">Name:</label>
             <input type="text" id="name" name="name" value={categoryData.name} onChange={handleInputChange} />
-
             <label htmlFor="imageFile">Image:</label>
             <input type="file" id="imageFile" name="imageFile" onChange={handleFileChange} />
-
             <button type="submit">Submit</button>
         </form>
     );

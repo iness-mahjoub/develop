@@ -6,7 +6,6 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 
 export default function App() {
-    const [categories, setCategories] = useState([]);
     const [data, setData] = useState([]);
     const [details, setDetails] = useState([]);
     const [search, setSearch] = useState("");
@@ -78,9 +77,8 @@ export default function App() {
                             <Table.Column width={50}>id</Table.Column>
                             <Table.Column width={50}>Name</Table.Column>
                             <Table.Column width={50}>Prix</Table.Column>
-                            <Table.Column width={50}>Images</Table.Column>
+                            <Table.Column width={50}>Image</Table.Column>
                             <Table.Column width={50}>Description</Table.Column>
-
                             <Table.Column width={50}>Stock</Table.Column>
 
                             <Table.Column width={70}>Actions</Table.Column>
@@ -122,6 +120,14 @@ export default function App() {
                                 </Table.Row>
                             ))}
                         </Table.Body>
+                        <Table.Pagination
+                            shadow
+                            noMargin
+
+                            align="center"
+                            rowsPerPage={7}
+                            onPageChange={(page) => console.log({ page })}
+                        />
                     </Table>
                 </div>
             </div>

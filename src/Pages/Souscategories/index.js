@@ -7,15 +7,16 @@ import { Link } from "react-router-dom";
 
 export default function App() {
     const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState("");
     const [data, setData] = useState([]);
+    const [details, setDetails] = useState([]);
     const [search, setSearch] = useState("");
-
 
     const handleDelete = (id) => {
         axios
             .delete(`http://localhost:8000/api/sous_categories/${id}`)
             .then(() => {
-                setCategories(categories.filter((item) => item.id !== id));
+                setData(data.filter((item) => item.id !== id));
             })
             .catch((error) => console.log(error));
     };
@@ -24,31 +25,44 @@ export default function App() {
         console.log(`Edit ${id}`);
     };
 
-    const filteredData = data.filter(({ name }) =>
-        name.toLowerCase().includes(search.toLowerCase())
-    );
+    const filteredData = data
+        .map((item) => {
+            const category = details.find((d) => d["@id"] === item.categorie);
+            const categoryName = category ? category.name : "";
+            return { ...item, categoryName };
+        })
+        .filter(
+            ({ name, categoryName }) =>
+                name.toLowerCase().includes(search.toLowerCase()) &&
+                (!selectedCategory || categoryName === selectedCategory)
+        );
 
     useEffect(() => {
-        fetch("http://localhost:8000/api/sous_categories")
-            .then((response) => response.json())
-            .then((data) => setData(data["hydra:member"]))
+        axios
+            .get("http://localhost:8000/api/sous_categories")
+            .then((response) => setData(response.data["hydra:member"]))
             .catch((error) => console.error(error));
 
-        fetch("http://localhost:8000/api/categories")
-            .then((response) => response.json())
-            .then((data) => setCategories(data["hydra:member"]))
+        axios
+            .get("http://localhost:8000/api/categories")
+            .then((response) => setDetails(response.data["hydra:member"]))
             .catch((error) => console.error(error));
     }, []);
 
-    const getCategoryName = (categoryId) => {
-        const category = categories.find((c) => c.id === categoryId);
-        return category ? category.name : "";
-    };
+    useEffect(() => {
+        setCategories(
+            details.map((category) => ({
+                label: category.name,
+                value: category.name,
+            }))
+        );
+    }, [details]);
 
     return (
         <div id="app">
             <div className="container">
                 <div className="search-and-add">
+
                     <div className="search-container">
                         <input
                             type="text"
@@ -58,9 +72,28 @@ export default function App() {
                         />
                     </div>
                     <div className="red">
-                        <Link to="/Addsouscategories">
-                            <button className="add_category">Ajouter une catégorie</button>
+                        <Link to="/Addproduit">
+                            <button className="add_category">Ajouter un produit </button>
                         </Link>
+
+                    </div>
+                    <div className="category-selector">
+                        <label htmlFor="category"> </label>
+                        <select
+                            id="category"
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            style={{ width: "200px" }}
+                        >
+                            <option value="">select categorie </option>
+
+                            {categories.map(({ label, value }) => (
+                                <option key={value} value={value}>
+
+                                    {label}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                 </div>
                 <div className="table-container">
@@ -72,23 +105,24 @@ export default function App() {
                         css={{
                             height: "100%",
                             width: "100%",
-                            minWidth: "800px",
-                            margin: "auto",
+                            minWidth: "800px", // Increase the minimum width
+                            margin: "auto", // Center the table horizontally
                         }}
                     >
                         <Table.Header>
-                            <Table.Column width={170}>id</Table.Column>
-                            <Table.Column width={200}>Name</Table.Column>
-                            <Table.Column width={200}>Category Name</Table.Column>
-                            <Table.Column width={160}>Image</Table.Column>
+                            <Table.Column width={50}>id</Table.Column>
+                            <
+                                Table.Column width={50}>Name</Table.Column>
+                            <Table.Column width={50}>catgories name</Table.Column>
+                            <Table.Column width={50}>Image</Table.Column>
                             <Table.Column width={70}>Actions</Table.Column>
                         </Table.Header>
                         <Table.Body>
-                            {filteredData.map(({ id, name, image, category }) => (
-                                <Table.Row key={id}>
-                                    <Table.Cell>{id}</Table.Cell>
-                                    <Table.Cell>{name}</Table.Cell>
-                                    <Table.Cell>{category && getCategoryName(category.id)}</Table.Cell>
+                            {filteredData.map((item) => (
+                                <Table.Row key={item.id}>
+                                    <Table.Cell>{item.id}</Table.Cell>
+                                    <Table.Cell>{item.name}</Table.Cell>
+                                    <Table.Cell>{item.categoryName}</Table.Cell>
 
                                     <Table.Cell>
                                         <div
@@ -100,23 +134,19 @@ export default function App() {
                                                 borderRadius: "50%",
                                                 overflow: "hidden",
                                             }}
-
                                         >
                                             <img
-                                                src={`http://localhost:8000/${image}`}
+                                                src={`http://localhost:8000/${item.image}`}
                                                 alt=""
                                                 style={{ maxWidth: "100%" }}
                                             />
                                         </div>
                                     </Table.Cell>
+
                                     <Table.Cell>
-                                        <div className="action-buttons">
-                                            <button onClick={() => handleEdit(id)}>
-                                                <FaEdit />
-                                            </button>
-                                            <button onClick={() => handleDelete(id)}>
-                                                <FaTrashAlt />
-                                            </button>
+                                        <div className="actions">
+                                            <FaEdit className="edit" onClick={() => handleEdit(item.id)} />
+                                            <FaTrashAlt className="delete" onClick={() => handleDelete(item.id)} />
                                         </div>
                                     </Table.Cell>
                                 </Table.Row>
@@ -130,8 +160,10 @@ export default function App() {
                             onPageChange={(page) => console.log({ page })}
                         />
                     </Table>
+
                 </div>
             </div>
         </div>
     );
 }
+

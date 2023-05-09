@@ -12,16 +12,16 @@
     color: red;
     cursor: pointer;
 }
-  
+
 .search-container {
     position: relative;
-  }
-  
-  .search-container input[type="text"] {
+}
+
+.search-container input[type="text"] {
     padding-left: 30px; /* Adjust this value to make space for the icon */
-  }
-  
-  .search-container svg {
+}
+
+.search-container svg {
     position: absolute;
     left: 5px;
     top: 50%;
@@ -29,10 +29,10 @@
     width: 20px;
     height: 20px;
     fill: #555; /* Change this value to adjust the color of the icon */
-  }
+}
 
 
-  .addcategory {
+.addsouscategories {
     background-color: #4CAF50; /* couleur de fond */
     color: white; /* couleur du texte */
     border: none; /* pas de bordure */
@@ -45,8 +45,8 @@
     cursor: pointer; /* curseur de souris */
     border-radius: 5px; /* bordure arrondie */
     transition: background-color 0.3s ease-in-out; /* transition pour la couleur de fond */
-  }
-  
-  .addcategory:hover {
+}
+
+.addsouscategories:hover {
     background-color: #3e8e41; /* couleur de fond au survol */
-  }
+}

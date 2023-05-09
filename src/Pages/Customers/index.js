@@ -1,120 +1,136 @@
-import { Avatar, Rate, Space, Table, Typography } from "antd";
-import React, { useEffect, useState } from "react";
+import { Table } from "@nextui-org/react";
 import "./index.css";
-import SearchIcon from "@mui/icons-material/Search";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import React, { useState, useEffect } from "react";
+import { FaTrashAlt, FaEdit } from "react-icons/fa";
+import axios from "axios";
 import { Link } from "react-router-dom";
 
-function Customers() {
-    const [loading, setLoading] = useState(false);
-    const [dataSource, setDataSource] = useState([]);
+export default function App() {
 
-    useEffect(() => {
-        setLoading(true);
-        fetch("http://localhost:8000/api/users")
-            .then((response) => response.json())
-            .then((data) => {
-                setDataSource(data["hydra:member"]);
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.error("Error fetching data: ", error);
-                setLoading(false);
-            });
-    }, []);
-
-    const handleEdit = (id) => {
-        // Handle edit button click
-    };
+    const [data, setData] = useState([]);
+    const [details, setDetails] = useState([]);
+    const [search, setSearch] = useState("");
 
     const handleDelete = (id) => {
-        setLoading(true);
-        fetch(`http://localhost:8000/api/users/${id}`, {
-            method: "DELETE",
-        })
+        axios
+            .delete(`http://localhost:8000/api/users/${id}`)
             .then(() => {
-                setDataSource(dataSource.filter((item) => item.id !== id));
-                setLoading(false);
+                setData(data.filter((item) => item.id !== id));
             })
-            .catch((error) => {
-                console.error("Error deleting item: ", error);
-                setLoading(false);
-            });
+            .catch((error) => console.log(error));
     };
 
+    const handleEdit = (id) => {
+        console.log(`Edit ${id}`);
+    };
+
+    const filteredData = data
+        .map((item) => {
+            const detail = details.find((d) => d.users === `/api/users/${item.id}`);
+            return { ...item, ...detail };
+        })
+        .filter(({ email }) => email.toLowerCase().includes(search.toLowerCase()));
+
+    useEffect(() => {
+        axios
+            .get("http://localhost:8000/api/users")
+            .then((response) => setData(response.data["hydra:member"]))
+            .catch((error) => console.error(error));
+
+        axios
+            .get("http://localhost:8000/api/adresses")
+            .then((response) => setDetails(response.data["hydra:member"]))
+            .catch((error) => console.error(error));
+    }, []);
+    console.log(data);
+    console.log(filteredData);
+
     return (
-        <Space size={20} direction="vertical">
-            <Typography.Title level={4}>Client </Typography.Title>
+        <div id="app">
+            <div className="container">
+                <div className="search-and-add">
+                    <div className="search-container">
+                        <input
+                            type="text"
+                            placeholder="Search by name"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                    </div>
+                    <div className="red">
+                        <Link to="/Addclient">
+                            <button className="add_category">Ajouter un produit </button>
+                        </Link>
+                    </div>
+                </div>
+                <div className="table-container">
+                    <Table
+                        bordered
+                        shadow={false}
+                        color="secondary"
+                        aria-label="Example pagination table"
+                        css={{
+                            height: "100%",
+                            width: "100%",
+                            minWidth: "800px", // Increase the minimum width
+                            margin: "auto", // Center the table horizontally
+                        }}
+                    >
+                        <Table.Header>
+                            <Table.Column >name</Table.Column>
+                            <Table.Column>lname</Table.Column>
+                            <Table.Column>email</Table.Column>
+                            <Table.Column  >number</Table.Column>
+                            <Table.Column >adresse</Table.Column>
+                            <Table.Column  >adresse secondaire</Table.Column>
+                            <Table.Column  >pays</Table.Column>
+                            <Table.Column  >ville</Table.Column>
+                            <Table.Column  >code postale</Table.Column>
+                            <Table.Column  >actions</Table.Column>
 
-            <Link to="/Addclient">
-                <button className="addclient">Ajouter un Client </button>
-            </Link>
-            <div className="search-container">
-                <input type="text" placeholder="Search..." />
-                <SearchIcon />
+
+
+
+
+                        </Table.Header>
+                        <Table.Body>
+                            {filteredData.map((item) => (
+                                <Table.Row key={item.id}>
+
+                                    <Table.Cell>{item.fname}</Table.Cell>
+                                    <Table.Cell>{item.lname}</Table.Cell>
+                                    <Table.Cell>{item.email}</Table.Cell>
+                                    <Table.Cell>{item.numTel}</Table.Cell>
+                                    <Table.Cell>{item.adresse1}</Table.Cell>
+                                    <Table.Cell>{item.adresse2}</Table.Cell>
+                                    <Table.Cell>{item.pay}</Table.Cell>
+                                    <Table.Cell>{item.ville}</Table.Cell>
+                                    <Table.Cell>{item.codeP}</Table.Cell>
+
+
+
+
+                                    <Table.Cell>
+                                        <div className="actions">
+                                            <FaEdit className="edit" onClick={() => handleEdit(item.id)} />
+                                            <FaTrashAlt className="delete" onClick={() => handleDelete(item.id)} />
+                                        </div>
+                                    </Table.Cell>
+                                </Table.Row>
+                            ))}
+                        </Table.Body>
+                        <Table.Pagination
+                            shadow
+                            noMargin
+
+                            align="center"
+                            rowsPerPage={9}
+                            onPageChange={(page) => console.log({ page })}
+                        />
+                    </Table>
+                </div>
             </div>
-            <Table
-                loading={loading}
-                columns={[
-                    { width: 260 },
-                    {
-                        title: "ID_client",
-                        dataIndex: "id",
-                    },
-                    {
-                        title: " Nom",
-                        dataIndex: "fname",
-                    },
-                    {
-                        title: "Prénom",
-                        dataIndex: "lname",
-                    },
-                    {
-                        title: "Email",
-                        dataIndex: "email",
-                    },
-                    {
-                        title: "Phone",
-                        dataIndex: "numTel",
-                    },
-                    {
-                        title: "address",
-                        dataIndex: "adresse",
-                        render: (address) => {
-                            return (
-                                <span>
-                  {address.address}, {address.city}
-                </span>
-                            );
-                        },
-                    },
-                    {
-                        title: "Action",
-                        dataIndex: "",
-                        width: 170,
-                        render: (params) => {
-                            return (
-                                <>
-                                    <Link to={`/Editclient/${params.id}`}>
-                                        <button className="clientedit">Edit</button>
-                                    </Link>
-
-                                    <DeleteOutlineIcon
-                                        className="clientdelete"
-                                        onClick={() => handleDelete(params.id)}
-                                    />
-                                </>
-                            );
-                        },
-                    },
-                ]}
-                dataSource={dataSource}
-                pagination={{
-                    pageSize: 4,
-                }}
-            ></Table>
-        </Space>
+        </div>
     );
 }
 
-export default Customers;
