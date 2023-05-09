@@ -1,64 +1,22 @@
 import { Table } from "@nextui-org/react";
 import "./index.css";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaTrashAlt, FaEdit } from "react-icons/fa";
+import axios from "axios";
+import {Link} from "react-router-dom";
 
 export default function App() {
-    const [data, setData] = useState([
-        {
-            id: 1,
-            name: "Tony Reichert",
-            role: "CEO",
-            status: "Active",
-        },
-        {
-            id: 2,
-            name: "Zoey Lang",
-            role: "Technical Lead",
-            status: "Paused",
-        },
-        {
-            id: 3,
-            name: "Jane Fisher",
-            role: "Senior Developer",
-            status: "Active",
-        },
-        {
-            id: 4,
-            name: "William Howard",
-            role: "Community Manager",
-            status: "Vacation",
-        },
-        {
-            id: 5,
-            name: "Jane Fisher",
-            role: "Senior Developer",
-            status: "Active",
-        },
-        {
-            id: 6,
-            name: "Zoey Lang",
-            role: "Technical Lead",
-            status: "Paused",
-        },
-        {
-            id: 7,
-            name: "Jane Fisher",
-            role: "Senior Developer",
-            status: "Active",
-        },
-        {
-            id: 8,
-            name: "William Howard",
-            role: "Community Manager",
-            status: "Vacation",
-        },
-    ]);
-
+    const [categories, setCategories] = useState([]);
+    const [data, setData] = useState([]);
     const [search, setSearch] = useState("");
 
     const handleDelete = (id) => {
-        setData(data.filter((item) => item.id !== id));
+        axios
+            .delete(`http://localhost:8000/api/categories/${id}`)
+            .then(() => {
+                setCategories(categories.filter((item) => item.id !== id));
+            })
+            .catch((error) => console.log(error));
     };
 
     const handleEdit = (id) => {
@@ -69,63 +27,101 @@ export default function App() {
         name.toLowerCase().includes(search.toLowerCase())
     );
 
+    useEffect(() => {
+        fetch("http://localhost:8000/api/categories")
+            .then((response) => response.json())
+            .then((data) => setData(data["hydra:member"]))
+            .catch((error) => console.error(error));
+    }, []);
+
     return (
+
         <div id="app">
-            <div className="search-container">
-                <input
-                    type="text"
-                    placeholder="Search by name"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                />
-            </div>
-            <div className="table-container">
-                <Table
-                    bordered
-                    shadow={false}
-                    color="secondary"
-                    aria-label="Example pagination table"
-                    css={{
-                        height: "100%",
-                        width: "100%",
-                        minWidth: "800px", // Increase the minimum width
-                        margin: "auto", // Center the table horizontally
-                    }}
-                    selectionMode="multiple"
-                >
-                    <Table.Header>
-                        <Table.Column>NAME</Table.Column>
-                        <Table.Column>ROLE</Table.Column>
-                        <Table.Column>STATUS</Table.Column>
-                        <Table.Column>ACTIONS</Table.Column>
-                    </Table.Header>
-                    <Table.Body>
-                        {filteredData.map(({ id, name, role, status }) => (
-                            <Table.Row key={id}>
-                                <Table.Cell>{name}</Table.Cell>
-                                <Table.Cell>{role}</Table.Cell>
-                                <Table.Cell>{status}</Table.Cell>
-                                <Table.Cell>
-                                    <div className="action-buttons">
-                                        <button onClick={() => handleEdit(id)}>
-                                            <FaEdit />
-                                        </button>
-                                        <button onClick={() => handleDelete(id)}>
-                                            <FaTrashAlt />
-                                        </button>
-                                    </div>
-                                </Table.Cell>
-                            </Table.Row>
-                        ))}
-                    </Table.Body>
-                    <Table.Pagination
-                        shadow
-                        noMargin
-                        align="center"
-                        rowsPerPage={8}
-                        onPageChange={(page) => console.log({ page })}
-                    />
-                </Table>
+
+            <div className="container">
+
+                <div className="search-and-add">
+                    <div className="search-container">
+                        <input
+                            type="text"
+                            placeholder="Search by name"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                    </div>
+                    <div className="red" >
+                        <Link to="/Addcategoris">
+                        <button className="add_category">Ajouter une catégorie</button>
+                    </Link>
+                    </div>
+
+                </div>
+
+                <div className="table-container">
+                    <Table
+                        bordered
+                        shadow={false}
+                        color="secondary"
+                        aria-label="Example pagination table"
+                        css={{
+                            height: "100%",
+                            width: "100%",
+                            minWidth: "800px", // Increase the minimum width
+                            margin: "auto", // Center the table horizontally
+                        }}
+                    >
+                        <Table.Header>
+                            <Table.Column width={170}>id</Table.Column>
+                            <Table.Column width={200}>Name</Table.Column>
+                            <Table.Column width={160}>Image</Table.Column>
+                            <Table.Column width={70}>Actions</Table.Column>
+                        </Table.Header>
+
+                        <Table.Body>
+                            {filteredData.map(({ id, name, image }) => (
+                                <Table.Row key={id}>
+                                    <Table.Cell>{id}</Table.Cell>
+                                    <Table.Cell>{name}</Table.Cell>
+                                    <Table.Cell>
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                justifyContent: "center",
+                                                width: "40px",
+                                                height: "40px",
+                                                borderRadius: "50%",
+                                                overflow: "hidden",
+                                            }}
+                                        >
+                                            <img
+                                                src={`http://localhost:8000/${image}`}
+                                                alt=""
+                                                style={{ maxWidth: "100%" }}
+                                            />
+                                        </div>
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <div className="action-buttons">
+                                            <button onClick={() => handleEdit(id)}>
+                                                <FaEdit />
+                                            </button>
+                                            <button onClick={() => handleDelete(id)}>
+                                                <FaTrashAlt />
+                                            </button>
+                                        </div>
+                                    </Table.Cell>
+                                </Table.Row>
+                            ))}
+                        </Table.Body>
+                        <Table.Pagination
+                            shadow
+                            noMargin
+                            align="center"
+                            rowsPerPage={7}
+                            onPageChange={(page) => console.log({ page })}
+                        />
+                    </Table>
+                </div>
             </div>
         </div>
     );
