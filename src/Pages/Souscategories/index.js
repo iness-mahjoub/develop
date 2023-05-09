@@ -9,7 +9,7 @@ export default function App() {
     const [categories, setCategories] = useState([]);
     const [data, setData] = useState([]);
     const [search, setSearch] = useState("");
-    const [categoryNames, setCategoryNames] = useState({});
+
 
     const handleDelete = (id) => {
         axios
