@@ -78,7 +78,7 @@ export default function App() {
                             <Table.Column width={50}>id</Table.Column>
                             <Table.Column width={50}>Name</Table.Column>
                             <Table.Column width={50}>Prix</Table.Column>
-                            <Table.Column width={50}>Image</Table.Column>
+                            <Table.Column width={50}>Images</Table.Column>
                             <Table.Column width={50}>Description</Table.Column>
 
                             <Table.Column width={50}>Stock</Table.Column>
